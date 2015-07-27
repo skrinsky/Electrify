@@ -1,0 +1,345 @@
+import processing.serial.*;
+import ddf.minim.*;
+import ddf.minim.signals.*;
+Serial myPort;  // Create object from Serial class
+String inStream;     // Data received from the serial port
+int inByte;
+
+Minim minim;
+AudioOutput out;
+
+SineWave[] sine = new SineWave[16];
+float[] freq = new float[16];
+float[] amp = new float[16];
+
+String[] num = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16" };
+String[] letter = { "W", "E", "T", "Y", "U", "A", "S", "D", "F", "G", "H", "J", "K" };
+
+float c = 261.63;
+float cs = 277.18;
+float d = 293.66;
+float ds = 311.13;
+float e = 329.63;
+float f = 349.23;
+float fs = 369.99;
+float g = 392.00;
+float gs = 415.30;
+float a = 440.00;
+float as = 466.16;
+float b = 493.88;
+float cc = 523.25;
+
+float octave = 1;
+
+void setup()
+{
+// I know that the first port in the serial list on my mac
+// is Serial.list()[0].
+// On Windows machines, this generally opens COM1.
+// Open whatever port is the one you're using.
+size(660, 320, P2D);
+background(0, 0, 96);
+smooth();
+String portName = Serial.list()[2]; //change the 0 to a 1 or 2 etc. to match your port
+myPort = new Serial(this, portName, 9600); 
+ minim = new Minim(this);
+  out = minim.getLineOut(Minim.MONO);
+  //textFont(loadFont("Helvetica-Bold-16.vlw"));
+ 
+  //Oscillators
+  for(int i = 0; i < 16; i++)
+  {
+    amp[i] = .1 / (i + 1);
+    sine[i] = new SineWave(freq[i], amp[i], 44100);
+    out.addSignal(sine[i]);
+  }
+  
+  //Display
+  fill(0, 0, 255);
+ 
+ 
+  stroke(0, 0, 255);
+  strokeWeight(2);
+  line(122, 300, 155, 300);
+  line(270, 300, 640, 300);
+  line(120, 155, 640, 155);
+  noStroke();
+  
+  fill(0, 0, 32);
+  ellipse(85, 245, 60, 60);
+  fill(0, 0, 255);
+  ellipse(85, 228, 15, 15);
+  noSmooth();
+  
+  fill(0, 0, 32);
+  rect(210, 170, 50, 50);
+  rect(270, 170, 50, 50);
+  rect(390, 170, 50, 50);
+  rect(450, 170, 50, 50);
+  rect(510, 170, 50, 50);
+  for(int x = 170; x <= 590; x = x + 60)
+  {
+    rect(x, 230, 50, 50);
+  }
+  smooth();
+  fill(0, 0, 255);
+
+  for(int i = 5; i < 13; i++)
+  {
+    //text(letter[i], 190 + (i - 5) * 60, 260);
+  } 
+  noSmooth();
+}
+void draw()
+{
+  if ( myPort.available() > 0) 
+  {  // If data is available,
+  inStream = myPort.readStringUntil('\n');         // read it and store it in val
+  
+  if(inStream != null){
+  
+  inStream = trim(inStream);
+  inByte = int(inStream);
+  println(inByte);
+  
+  }
+  
+  } 
+  for(int i = 0; i < 16; i++)
+  {
+    if(mouseX >= 20 + i * 40 && mouseX < 40 + i * 40 && mouseY >= 20 && mouseY < 120)
+    {
+      amp[i] = map(119 - mouseY, 0, 100, 0.0, 0.1);
+      sine[i].setAmp(amp[i]);
+    }
+  }
+  
+  fill(0, 0, 32);
+  
+  for(int x = 20; x <= 620; x = x + 40)
+  {
+    rect(x, 20, 20, 100);
+  }
+  
+  fill(0, 0, 255);
+  
+  for(int i = 0; i < 16; i++)
+  {
+    rect(20 + i * 40, 120 - map(amp[i], 0.0, 0.1, 0, 100), 20, map(amp[i], 0.0, 0.1, 0, 100));
+  }
+  playTone();
+}
+
+
+
+void playTone(){
+  
+  fill(0, 0, 32);
+  rect(210, 170, 50, 50);
+  rect(270, 170, 50, 50);
+  rect(390, 170, 50, 50);
+  rect(450, 170, 50, 50);
+  rect(510, 170, 50, 50);
+  for(int x = 170; x <= 590; x = x + 60)
+  {
+    rect(x, 230, 50, 50);
+  }
+  
+  //smooth();
+  fill(0, 0, 255);
+
+  
+ // noSmooth();
+  
+  //c
+  if(inByte < 130)
+  {
+    for(int i = 0; i < 16; i++)
+    {
+      freq[i] = c * (i + 1) * octave;
+      sine[i].setFreq(freq[i]);
+      sine[i].setAmp(amp[i]);
+    }
+    
+    fill(0, 0, 255);
+    rect(170, 230, 50, 50);
+  }
+  
+  //c#
+  else if(inByte < 140)
+  {
+    for(int i = 0; i < 16; i++)
+    {
+      freq[i] = cs * (i + 1) * octave;
+      sine[i].setFreq(freq[i]);
+      sine[i].setAmp(amp[i]);
+    }
+    
+    fill(0, 0, 255);
+    rect(210, 170, 50, 50);
+  }
+
+  //d
+  else if(inByte < 150)
+  {
+    for(int i = 0; i < 16; i++)
+    {
+      freq[i] = d * (i + 1) * octave;
+      sine[i].setFreq(freq[i]);
+      sine[i].setAmp(amp[i]);
+    }
+    
+    fill(0, 0, 255);
+    rect(230, 230, 50, 50);
+  }
+  
+  //d#
+  else if(inByte < 160)
+  {
+    for(int i = 0; i < 16; i++)
+    {
+      freq[i] = ds * (i + 1) * octave;
+      sine[i].setFreq(freq[i]);
+      sine[i].setAmp(amp[i]);
+    }
+    
+    fill(0, 0, 255);
+    rect(270, 170, 50, 50);
+  }
+  
+  //e
+  else if(inByte < 180)
+  {
+    for(int i = 0; i < 16; i++)
+    {
+      freq[i] = e * (i + 1) * octave;
+      sine[i].setFreq(freq[i]);
+      sine[i].setAmp(amp[i]);
+    }
+    
+    fill(0, 0, 255);
+    rect(290, 230, 50, 50);
+  }
+  
+  //f
+  else if(inByte < 220)
+  {
+    for(int i = 0; i < 16; i++)
+    {
+      freq[i] = f * (i + 1) * octave;
+      sine[i].setFreq(freq[i]);
+      sine[i].setAmp(amp[i]);
+    }
+    
+    fill(0, 0, 255);
+    rect(350, 230, 50, 50);
+  }
+  
+  //f#
+  else if(inByte < 240)
+  {
+    for(int i = 0; i < 16; i++)
+    {
+      freq[i] = fs * (i + 1) * octave;
+      sine[i].setFreq(freq[i]);
+      sine[i].setAmp(amp[i]);
+    }
+    
+    fill(0, 0, 255);
+    rect(390, 170, 50, 50);
+  }
+  
+  //g
+  else if(inByte < 260)
+  {
+    for(int i = 0; i < 16; i++)
+    {
+      freq[i] = g * (i + 1) * octave;
+      sine[i].setFreq(freq[i]);
+      sine[i].setAmp(amp[i]);
+    }
+    
+    fill(0, 0, 255);
+    rect(410, 230, 50, 50);
+  }
+
+  //g#
+  else if(inByte < 280)
+  {
+    for(int i = 0; i < 16; i++)
+    {
+      freq[i] = gs * (i + 1) * octave;
+      sine[i].setFreq(freq[i]);
+      sine[i].setAmp(amp[i]);
+    }
+    
+    fill(0, 0, 255);
+    rect(450, 170, 50, 50);
+  }
+  
+  //a
+  else if(inByte < 300)
+  {
+    for(int i = 0; i < 16; i++)
+    {
+      freq[i] = a * (i + 1) * octave;
+      sine[i].setFreq(freq[i]);
+      sine[i].setAmp(amp[i]);
+    }
+    
+    fill(0, 0, 255);
+    rect(470, 230, 50, 50);
+  }
+  
+  //a#
+  else if(inByte < 320)
+  {
+    for(int i = 0; i < 16; i++)
+    {
+      freq[i] = as * (i + 1) * octave;
+      sine[i].setFreq(freq[i]);
+      sine[i].setAmp(amp[i]);
+    }
+    
+    fill(0, 0, 255);
+    rect(510, 170, 50, 50);
+  }
+  
+  //b
+  else if(inByte < 340)
+  {
+    for(int i = 0; i < 16; i++)
+    {
+      freq[i] = b * (i + 1) * octave;
+      sine[i].setFreq(freq[i]);
+      sine[i].setAmp(amp[i]);
+    }
+    
+    fill(0, 0, 255);
+    rect(530, 230, 50, 50);
+  }
+  
+  //high c
+  else if(inByte < 360)
+  {
+    for(int i = 0; i < 16; i++)
+    {
+      freq[i] = cc * (i + 1) * octave;
+      sine[i].setFreq(freq[i]);
+      sine[i].setAmp(amp[i]);
+    }
+    
+    fill(0, 0, 255);
+    rect(590, 230, 50, 50);
+  }
+}
+  
+void stop()
+{
+  out.close();
+  minim.stop();
+  
+  super.stop();
+}
+
+
